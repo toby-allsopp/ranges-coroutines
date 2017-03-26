@@ -25,6 +25,7 @@ TEST_CASE("one element") {
   CHECK(*b == 0);
   CHECK(*b == 0);
   auto&& v = *b;
+  CHECK(v == 0);
   ++b;
   CHECK(b == g.end());
   CHECK(v == 0);
