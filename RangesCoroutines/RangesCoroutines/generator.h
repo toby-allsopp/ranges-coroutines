@@ -99,9 +99,8 @@ class generator {
       ++(*this);
       return ret;
     }
-    ElementType& operator*() const {
-      return m_generator->m_coro->promise().currentElement;
-    }
+
+    reference operator*() const { return m_generator->m_coro->promise().currentElement; }
 
     generator* m_generator;
   };
