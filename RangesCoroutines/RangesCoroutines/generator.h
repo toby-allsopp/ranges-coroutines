@@ -51,24 +51,7 @@ class shared_coroutine_handle {
 template <class ElementType>
 class generator {
  public:
-  struct promise_type {
-    ElementType currentElement;
-    int ref_count{0};
-
-    void add_ref() { ++ref_count; }
-    int del_ref() { return --ref_count; }
-
-    generator get_return_object() {
-      return generator{
-          std::experimental::coroutine_handle<promise_type>::from_promise(*this)};
-    }
-    auto initial_suspend() { return std::experimental::suspend_always{}; }
-    auto yield_value(ElementType element) {
-      currentElement = std::move(element);
-      return std::experimental::suspend_always{};
-    }
-    auto final_suspend() { return std::experimental::suspend_always{}; }
-  };
+  struct promise_type;
 
   generator() = default;
   generator(std::experimental::coroutine_handle<promise_type> coro) : m_coro(coro) {}
@@ -122,4 +105,24 @@ class generator {
   };
 
   shared_coroutine_handle<promise_type> m_coro;
+};
+
+template <class ElementType>
+struct generator<ElementType>::promise_type {
+  ElementType currentElement;
+  int ref_count{0};
+
+  void add_ref() { ++ref_count; }
+  int del_ref() { return --ref_count; }
+
+  generator get_return_object() {
+    return generator{
+        std::experimental::coroutine_handle<promise_type>::from_promise(*this)};
+  }
+  auto initial_suspend() { return std::experimental::suspend_always{}; }
+  auto yield_value(ElementType element) {
+    currentElement = std::move(element);
+    return std::experimental::suspend_always{};
+  }
+  auto final_suspend() { return std::experimental::suspend_always{}; }
 };
