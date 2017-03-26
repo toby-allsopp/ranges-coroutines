@@ -2,6 +2,11 @@
 
 #include <experimental/coroutine>
 
+/// An RAII-style shared-ownership wrapper for std::experimental::coroutine_handle.
+///
+/// Cooperation with the promise object is required, ala boost::intrusive_ptr.  The
+/// promise object is required to have two member functions: `void add_ref()` and `int
+/// del_ref()`.
 template <class PromiseType>
 class shared_coroutine_handle {
  public:
