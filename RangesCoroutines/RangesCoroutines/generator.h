@@ -85,7 +85,9 @@ class generator {
       }
       return *this;
     }
+
     // we need to make auto x = *i++ equivalent to auto x = *i; ++i;
+    // until P0541
     auto operator++(int) {
       struct proxy {
         using value_type = ElementType;
