@@ -25,7 +25,7 @@ for (int i : infinite_sequence()) {
 
 This is wonderful, however these `generator` objects can't be using alongside the also wonderful range-v3 library. This is due to `generator` not satisfying all of the requirements of the `Range` concept (see https://github.com/Microsoft/Range-V3-VS2015/issues/12).
 
-The `generator` class template included in this repository is intended to be a drop-in replacement for Microsoft's one. It has the advantage that it supports Ranges. It has the disadvantage that it is less efficient (it uses `std::shared_ptr`).
+The `generator` class template included in this repository is intended to be a drop-in replacement for Microsoft's one. It has the advantage that it supports Ranges. It has the disadvantage that it is ever-so-slightly less efficient because it has to maintain a reference count in order to support copying.
 
 It allows you write code like:
 
