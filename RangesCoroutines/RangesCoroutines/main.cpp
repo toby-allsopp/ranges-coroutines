@@ -12,11 +12,6 @@
 
 auto logger = spdlog::stdout_logger_mt("STDOUT");
 
-namespace ranges {
-  template <typename T>
-  struct is_view<generator<T>> : std::true_type {};
-}
-
 generator<int> cofoo() {
   logger->info("before loop");
   for (int i = 0; i < 5; ++i) {
