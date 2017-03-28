@@ -12,6 +12,8 @@
 
 auto logger = spdlog::stdout_logger_mt("STDOUT");
 
+using toby::generator;
+
 generator<int> cofoo() {
   logger->info("before loop");
   for (int i = 0; i < 5; ++i) {

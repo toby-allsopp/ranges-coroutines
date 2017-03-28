@@ -4,6 +4,8 @@
 #include <doctest/doctest.h>
 #include <range/v3/all.hpp>
 
+using toby::generator;
+
 generator<int> upto(int n) {
   for (int i = 0; i < n; ++i) co_yield i;
 }
