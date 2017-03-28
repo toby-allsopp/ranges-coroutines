@@ -28,8 +28,7 @@ generator<int> cofoo() {
 
 template <typename InputRange, typename UnaryPredicate>
 auto filter_co(InputRange range, UnaryPredicate pred)
-    -> generator<typename std::iterator_traits<
-        decltype(std::declval<InputRange>().begin())>::value_type> {
+    -> generator<ranges::range_value_t<InputRange>> {
   for (auto&& x : range) {
     if (pred(x)) {
       co_yield x;
