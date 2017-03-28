@@ -9,38 +9,33 @@ namespace toby {
   /// promise object is required to have two member functions: `void add_ref()` and `int
   /// del_ref()`.
   template <class PromiseType>
-  class shared_coroutine_handle {
+  class intrusive_coroutine_handle {
    public:
-    shared_coroutine_handle() : m_coro(nullptr) {}
-    shared_coroutine_handle(std::experimental::coroutine_handle<PromiseType> coro)
+    intrusive_coroutine_handle() : m_coro(nullptr) {}
+    intrusive_coroutine_handle(std::experimental::coroutine_handle<PromiseType> coro)
         : m_coro(coro) {
-      if (m_coro) {
-        m_coro.promise().add_ref();
-      }
+      intrusive_coroutine_handle_add_ref(m_coro);
     }
 
-    shared_coroutine_handle(const shared_coroutine_handle& other)
-        : shared_coroutine_handle(other.m_coro) {}
-    shared_coroutine_handle(shared_coroutine_handle&& other) : shared_coroutine_handle() {
+    intrusive_coroutine_handle(const intrusive_coroutine_handle& other)
+        : intrusive_coroutine_handle(other.m_coro) {}
+    intrusive_coroutine_handle(intrusive_coroutine_handle&& other)
+        : intrusive_coroutine_handle() {
       std::swap(m_coro, other.m_coro);
     }
 
-    shared_coroutine_handle& operator=(const shared_coroutine_handle& other) {
-      this->~shared_coroutine_handle();
-      new (this) shared_coroutine_handle(other);
+    intrusive_coroutine_handle& operator=(const intrusive_coroutine_handle& other) {
+      this->~intrusive_coroutine_handle();
+      new (this) intrusive_coroutine_handle(other);
       return *this;
     }
-    shared_coroutine_handle& operator=(shared_coroutine_handle&& other) {
-      this->~shared_coroutine_handle();
-      new (this) shared_coroutine_handle(std::move(other));
+    intrusive_coroutine_handle& operator=(intrusive_coroutine_handle&& other) {
+      this->~intrusive_coroutine_handle();
+      new (this) intrusive_coroutine_handle(std::move(other));
       return *this;
     }
 
-    ~shared_coroutine_handle() {
-      if (m_coro && m_coro.promise().del_ref() == 0) {
-        m_coro.destroy();
-      }
-    }
+    ~intrusive_coroutine_handle() { intrusive_coroutine_handle_release(m_coro); }
 
     std::experimental::coroutine_handle<PromiseType>& operator*() { return m_coro; }
     std::experimental::coroutine_handle<PromiseType>* operator->() { return &m_coro; }
@@ -108,7 +103,7 @@ namespace toby {
       generator* m_generator;
     };
 
-    shared_coroutine_handle<promise_type> m_coro;
+    intrusive_coroutine_handle<promise_type> m_coro;
   };
 
   template <class ElementType>
@@ -130,4 +125,17 @@ namespace toby {
     }
     auto final_suspend() { return std::experimental::suspend_always{}; }
   };
+
+  template <typename PromiseType>
+  void intrusive_coroutine_handle_add_ref(
+      std::experimental::coroutine_handle<PromiseType> coro) {
+    if (coro) coro.promise().add_ref();
+  }
+
+  template <typename PromiseType>
+  void intrusive_coroutine_handle_release(
+      std::experimental::coroutine_handle<PromiseType> coro) {
+    if (coro && coro.promise().del_ref() == 0) coro.destroy();
+  }
+
 }  // namespace toby
