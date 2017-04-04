@@ -6,3 +6,4 @@
 Debug/
 Release/
 *.VC.db
+/build/

@@ -2,7 +2,7 @@
 
 This repository contains some helpers for and demonstrations of using Ranges and Coroutines together.
 
-Currently this code has only been tested using Visual Studio 2017 as that is the only environment that easily supports Coroutines at the moment (March 2017). It should be possible to get this to work using recent nightly builds of Clang and libc++ also.
+Currently this code has only been tested using Visual Studio 2017 and a build of specific branches of clang and libc++.
 
 ## `generator` - a Range-friendly generator
 
@@ -69,11 +69,59 @@ infinite_sequence()
 
 # Dependencies #
 
-To build the tests, you will need:
+To build the tests, you will need either:
 
 - Visual Studio 2017 (2015 might also work - not tested)
-- range-v3 (I installed using vcpkg)
-- spdlog
+- Clang and libc++ built from particular branches (see below)
+
+The following are included:
+- range-v3
+- spdlog (currently not)
 - doctest
 
 The library itself is header-only and only depends on having an `<experimental/coroutine>` header available.
+
+# Building #
+
+## Visual Studio ##
+
+## Clang ##
+
+Currently, you will need to build your own clang and libc++. Hopefully this stuff will get merged into those projects' trunks soon.
+
+### Checkout llvm, clang, libcxx and libcxxabi
+
+    cd $SRC_ROOT # you choose this directory
+    git clone -b merge0307 https://github.com/GorNishanov/llvm.git
+    cd llvm/tools
+    git clone -b merge0307 https://github.com/GorNishanov/clang.git
+    cd ../projects
+    git clone -b coroutines https://github.com/efcs/libcxx.git
+    git clone https://github.com/llvm-mirror/libcxxabi.git
+    
+### Configure
+
+    cd $SRC_ROOT
+    mkdir build
+    cd build
+    cmake ..
+    
+### Build
+
+    cd $SRC_ROOT/build
+    make # use -jN if you have lots of RAM
+    
+### Configure generator
+
+    cd $LOCATION_OF_THIS_FILE
+    mkdir build
+    cd build
+    cmake CXX=$SRC_ROOT/build/bin/clang++ ..
+    
+### Build generator
+
+    make
+    
+### Run tests
+
+    LD_LIBRARY_PATH=$SRC_ROOT/build/lib ./generator/generator_test

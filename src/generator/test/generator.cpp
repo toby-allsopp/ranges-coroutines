@@ -1,7 +1,8 @@
 #define SPDLOG_FMT_EXTERNAL
 #include "generator.h"
 
-#include <doctest/doctest.h>
+//#include <doctest/doctest.h>
+#include "doctest.h"
 #include <range/v3/all.hpp>
 
 using toby::generator;
@@ -97,14 +98,16 @@ TEST_CASE("infinite generator") {
     CHECK(*i++ == 1);
   }
   SUBCASE("take 5") {
-    static_assert(ranges::v3::Destructible<decltype(g.begin())>::value);
-    static_assert(ranges::v3::Iterator<decltype(g.begin())>::value);
+    CONCEPT_ASSERT(ranges::v3::Destructible<decltype(g.begin())>::value);
+    CONCEPT_ASSERT(ranges::v3::Iterator<decltype(g.begin())>::value);
     CONCEPT_ASSERT(ranges::v3::Readable<decltype(g.begin())>::value);
     CONCEPT_ASSERT(ranges::v3::DefaultConstructible<decltype(g.begin()++)>::value);
     CONCEPT_ASSERT(ranges::v3::Readable<decltype(g.begin()++)>::value);
     CONCEPT_ASSERT(ranges::v3::InputIterator<decltype(g.begin())>::value);
     CONCEPT_ASSERT(ranges::v3::InputRange<decltype(g)>::value);
-    std::vector<int> v = g | ranges::view::take(5) | ranges::to_vector;
+    auto a = ranges::view::take(5) | ranges::to_vector;
+    auto b = g | ranges::view::take(5);
+    std::vector<int> v = b;
     CHECK(v == std::vector<int>({0, 1, 2, 3, 4}));
   }
 }
