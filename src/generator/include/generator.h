@@ -48,16 +48,15 @@ public:
 
   ~intrusive_coroutine_handle() { intrusive_coroutine_handle_release(m_coro); }
 
-  std::experimental::coroutine_handle<PromiseType> &operator*() const {
+  std::experimental::coroutine_handle<PromiseType> &operator*() {
     return m_coro;
   }
-  std::experimental::coroutine_handle<PromiseType> *operator->() const {
+  std::experimental::coroutine_handle<PromiseType> *operator->() {
     return &m_coro;
   }
 
 private:
-  // this is mutable in order to support iterating over a const generator
-  mutable std::experimental::coroutine_handle<PromiseType> m_coro;
+  std::experimental::coroutine_handle<PromiseType> m_coro;
 };
 
 template <class ElementType> class generator {
@@ -68,22 +67,22 @@ public:
   generator(std::experimental::coroutine_handle<promise_type> coro)
       : m_coro(coro) {}
 
-  auto begin() const {
+  auto begin() {
     m_coro->resume();
     return m_coro->done() ? end() : iterator{this};
   }
-  auto end() const { return iterator{}; }
+  auto end() { return iterator{}; }
 
 private:
   struct iterator {
     using value_type = ElementType;
     using difference_type = std::ptrdiff_t;
     using reference = ElementType &;
-    using pointer = ElementType const *;
+    using pointer = ElementType *;
     using iterator_category = std::input_iterator_tag;
 
     iterator() : m_generator(nullptr) {}
-    iterator(const generator *gen) : m_generator(gen) {}
+    iterator(generator *gen) : m_generator(gen) {}
 
     bool operator==(const iterator &other) const {
       return m_generator == other.m_generator;
@@ -104,7 +103,7 @@ private:
       struct proxy {
         using value_type = ElementType;
         ElementType element;
-        const ElementType &operator*() const { return element; }
+        //ElementType &operator*() const { return element; }
         ElementType &operator*() { return element; }
       };
       proxy ret{std::move(**this)};
@@ -116,7 +115,7 @@ private:
       return m_generator->m_coro->promise().currentElement;
     }
 
-    const generator *m_generator;
+    generator *m_generator;
   };
 
   intrusive_coroutine_handle<promise_type> m_coro;
