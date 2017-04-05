@@ -138,6 +138,7 @@ template <class ElementType> struct generator<ElementType>::promise_type {
     currentElement = std::move(element);
     return std::experimental::suspend_always{};
   }
+  void return_void() {}
   auto final_suspend() { return std::experimental::suspend_always{}; }
 };
 
