@@ -9,5 +9,8 @@ else()
   target_include_directories(range-v3 INTERFACE deps/range-v3/include)
 endif()
 
+add_library(hayai INTERFACE)
+target_include_directories(hayai INTERFACE deps/hayai/src)
+
 enable_testing()
 add_subdirectory(generator)

@@ -4,3 +4,6 @@
 [submodule "src/deps/Range-V3-VS2015"]
 	path = src/deps/Range-V3-VS2015
 	url = https://github.com/Microsoft/Range-V3-VS2015
+[submodule "src/deps/hayai"]
+	path = src/deps/hayai
+	url = https://github.com/nickbruun/hayai.git

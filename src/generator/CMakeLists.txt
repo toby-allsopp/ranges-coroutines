@@ -18,3 +18,5 @@ add_executable(generator_test test/generator.cpp test/main.cpp)
 target_link_libraries(generator_test generator range-v3)
 
 add_test(generator_test generator_test)
+
+add_subdirectory(bench)

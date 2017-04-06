@@ -15,7 +15,7 @@
 
 using toby::generator;
 
-generator<int> cofoo() {
+generator<int> co_ints() {
   // logger->info("before loop");
   for (int i = 0; i < 5; ++i) {
     // logger->info("about to yield: {}", i);
@@ -96,7 +96,7 @@ int main() {
                             // doing this
     return res;             // propagate the result of the tests
 
-  for (auto &&x : cofoo()) {
+  for (auto &&x : co_ints()) {
     std::cout << x << "\n";
   }
 
@@ -108,34 +108,34 @@ int main() {
   }
 
   // filter a generator using a generator
-  for (auto &&x : filter_co(cofoo(), pred)) {
+  for (auto &&x : filter_co(co_ints(), pred)) {
     std::cout << x << "\n";
   }
-  for (auto &&x : cofoo() | filter_co(pred)) {
+  for (auto &&x : co_ints() | filter_co(pred)) {
     std::cout << x << "\n";
   }
 
   // filter a generator using a range view
-  RANGES_FOR(auto &&x, filter_rv(cofoo(), pred)) { std::cout << x << "\n"; }
+  RANGES_FOR(auto &&x, filter_rv(co_ints(), pred)) { std::cout << x << "\n"; }
 
   // filter a generator using a range view
-  RANGES_FOR(auto &&x, cofoo() | filter_rv(pred)) { std::cout << x << "\n"; }
+  RANGES_FOR(auto &&x, co_ints() | filter_rv(pred)) { std::cout << x << "\n"; }
 
   // filter a generator using a range view
-  CONCEPT_ASSERT(ranges::v3::InputRange<decltype(cofoo())>::value);
-  CONCEPT_ASSERT(ranges::v3::Range<decltype(cofoo())>());
-  CONCEPT_ASSERT(ranges::v3::MoveConstructible<decltype(cofoo())>());
-  CONCEPT_ASSERT(ranges::v3::Movable<decltype(cofoo())>());
-  CONCEPT_ASSERT(ranges::v3::CopyConstructible<decltype(cofoo())>());
-  CONCEPT_ASSERT(ranges::v3::Copyable<decltype(cofoo())>());
-  CONCEPT_ASSERT(ranges::v3::SemiRegular<decltype(cofoo())>());
-  CONCEPT_ASSERT(ranges::v3::View<decltype(cofoo())>());
+  CONCEPT_ASSERT(ranges::v3::InputRange<decltype(co_ints())>::value);
+  CONCEPT_ASSERT(ranges::v3::Range<decltype(co_ints())>());
+  CONCEPT_ASSERT(ranges::v3::MoveConstructible<decltype(co_ints())>());
+  CONCEPT_ASSERT(ranges::v3::Movable<decltype(co_ints())>());
+  CONCEPT_ASSERT(ranges::v3::CopyConstructible<decltype(co_ints())>());
+  CONCEPT_ASSERT(ranges::v3::Copyable<decltype(co_ints())>());
+  CONCEPT_ASSERT(ranges::v3::SemiRegular<decltype(co_ints())>());
+  CONCEPT_ASSERT(ranges::v3::View<decltype(co_ints())>());
 
-  RANGES_FOR(auto &&x, cofoo() | ranges::view::remove_if(pred)) {
+  RANGES_FOR(auto &&x, co_ints() | ranges::view::remove_if(pred)) {
     std::cout << x << "\n";
   }
 
-  RANGES_FOR(auto &&x, ranges::view::remove_if(cofoo(), pred)) {
+  RANGES_FOR(auto &&x, ranges::view::remove_if(co_ints(), pred)) {
     std::cout << x << "\n";
   }
 

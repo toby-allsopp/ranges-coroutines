@@ -8,3 +8,5 @@ Release/
 *.VC.db
 /build/
 /.vs
+/.idea/
+/.vscode/
