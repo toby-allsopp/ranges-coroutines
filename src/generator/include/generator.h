@@ -103,7 +103,7 @@ private:
       struct proxy {
         using value_type = ElementType;
         ElementType element;
-        //ElementType &operator*() const { return element; }
+        const ElementType &operator*() const { return element; }
         ElementType &operator*() { return element; }
       };
       proxy ret{std::move(**this)};
