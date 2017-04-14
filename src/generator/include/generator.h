@@ -64,9 +64,9 @@ namespace toby {
 
     auto begin() {
       m_coro->resume();
-      return m_coro->done() ? end() : iterator{this};
+      return iterator{this, m_coro->done()};
     }
-    auto end() { return iterator{}; }
+    auto end() { return iterator{this, true}; }
 
    private:
     struct iterator {
@@ -76,19 +76,15 @@ namespace toby {
       using pointer           = ElementType*;
       using iterator_category = std::input_iterator_tag;
 
-      iterator() : m_generator(nullptr) {}
-      iterator(generator* gen) : m_generator(gen) {}
+      iterator() : m_generator(nullptr), m_done(true) {}
+      iterator(generator* gen, bool done) : m_generator(gen), m_done(done) {}
 
-      bool operator==(const iterator& other) const {
-        return m_generator == other.m_generator;
-      }
+      bool operator==(const iterator& other) const { return m_done == other.m_done; }
       bool operator!=(const iterator& other) const { return !(*this == other); }
 
       iterator& operator++() {
         m_generator->m_coro->resume();
-        if (m_generator->m_coro->done()) {
-          m_generator = nullptr;  // makes *this == end()
-        }
+        m_done = m_generator->m_coro->done();
         return *this;
       }
 
@@ -111,6 +107,7 @@ namespace toby {
       }
 
       generator* m_generator;
+      bool m_done;
     };
 
     intrusive_coroutine_handle<promise_type> m_coro;
