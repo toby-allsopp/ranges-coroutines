@@ -54,7 +54,7 @@ namespace toby {
     std::experimental::coroutine_handle<PromiseType> m_coro;
   };
 
-  template <class ElementType>
+  template <class ElementType, class RefCountType = int>
   class generator {
    public:
     struct promise_type;
@@ -116,13 +116,13 @@ namespace toby {
     intrusive_coroutine_handle<promise_type> m_coro;
   };
 
-  template <class ElementType>
-  struct generator<ElementType>::promise_type {
+  template <class ElementType, class RefCountType>
+  struct generator<ElementType, RefCountType>::promise_type {
     ElementType currentElement;
-    int ref_count{0};
+    RefCountType ref_count{0};
 
     void add_ref() { ++ref_count; }
-    int del_ref() { return --ref_count; }
+    auto del_ref() { return --ref_count; }
 
     generator get_return_object() {
       return generator{
