@@ -2,8 +2,10 @@
 #include "generator.h"
 
 //#include <doctest/doctest.h>
-#include "doctest.h"
 #include <range/v3/all.hpp>
+#include "doctest.h"
+
+#include <memory>
 
 using toby::generator;
 
@@ -105,8 +107,8 @@ TEST_CASE("infinite generator") {
     CONCEPT_ASSERT(ranges::v3::Readable<decltype(g.begin()++)>::value);
     CONCEPT_ASSERT(ranges::v3::InputIterator<decltype(g.begin())>::value);
     CONCEPT_ASSERT(ranges::v3::InputRange<decltype(g)>::value);
-    auto a = ranges::view::take(5) | ranges::to_vector;
-    auto b = g | ranges::view::take(5);
+    auto a             = ranges::view::take(5) | ranges::to_vector;
+    auto b             = g | ranges::view::take(5);
     std::vector<int> v = b;
     CHECK(v == std::vector<int>({0, 1, 2, 3, 4}));
   }

@@ -1,9 +1,8 @@
 #include "generator.h"
+#include "gor_generator.h"
 
 #include <hayai.hpp>
 #include <range/v3/view/iota.hpp>
-
-using toby::generator;
 
 template <class Generator>
 Generator co_ints(int start, int end) {
@@ -24,13 +23,19 @@ extern void consume(int);
 static const int NUM = 1;
 
 BENCHMARK(cofoo, co_ints, 1000, 100000 / NUM) {
-  for (int i : co_ints<generator<int>>(0, NUM)) {
+  for (int i : co_ints<toby::generator<int>>(0, NUM)) {
+    consume(i);
+  }
+}
+
+BENCHMARK(cofoo, co_ints_gor, 1000, 100000 / NUM) {
+  for (int i : co_ints<gor::generator<int>>(0, NUM)) {
     consume(i);
   }
 }
 
 BENCHMARK(cofoo, co_ints_atomic, 1000, 100000 / NUM) {
-  for (int i : co_ints<generator<int, std::atomic<int>>>(0, NUM)) {
+  for (int i : co_ints<toby::generator<int, std::atomic<int>>>(0, NUM)) {
     consume(i);
   }
 }
@@ -45,13 +50,13 @@ BENCHMARK(cofoo, handrolled_ints, 1000, 100000 / NUM) {
 BENCHMARK(co_ints, cb_ints, 1000, 100000/NUM) {
   cb_ints(0, NUM, [](int i) { consume(i); });
 }
+*/
 
-BENCHMARK(cofoo, ranges, 1000, 1000000/NUM) {
+BENCHMARK(cofoo, ranges, 1000, 1000000 / NUM) {
   for (auto i : ranges::view::ints(0, NUM)) {
     consume(i);
   }
 }
-*/
 
 int main() {
   hayai::ConsoleOutputter consoleOutputter;

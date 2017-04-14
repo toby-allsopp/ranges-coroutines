@@ -1,3 +1,1 @@
-void consume(int)
-{
-}
+void consume(int) {}
