@@ -94,24 +94,18 @@ int main() {
                              // doing this
     return res;              // propagate the result of the tests
 
-  for (auto&& x : co_ints()) {
-    std::cout << x << "\n";
-  }
+  RANGES_FOR(auto&& x, co_ints()) { std::cout << x << "\n"; }
 
   auto pred = [](int x) { return x % 2 == 0; };
 
   // filter a vector
-  for (auto&& x : filter_co(std::vector<int>{1, 2, 3, 4, 5}, pred)) {
+  RANGES_FOR(auto&& x, filter_co(std::vector<int>{1, 2, 3, 4, 5}, pred)) {
     std::cout << x << "\n";
   }
 
   // filter a generator using a generator
-  for (auto&& x : filter_co(co_ints(), pred)) {
-    std::cout << x << "\n";
-  }
-  for (auto&& x : co_ints() | filter_co(pred)) {
-    std::cout << x << "\n";
-  }
+  RANGES_FOR(auto&& x, filter_co(co_ints(), pred)) { std::cout << x << "\n"; }
+  RANGES_FOR(auto&& x, co_ints() | filter_co(pred)) { std::cout << x << "\n"; }
 
   // filter a generator using a range view
   RANGES_FOR(auto&& x, filter_rv(co_ints(), pred)) { std::cout << x << "\n"; }

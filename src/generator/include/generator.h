@@ -64,11 +64,12 @@ namespace toby {
 
     auto begin() {
       m_coro->resume();
-      return iterator{this, m_coro->done()};
+      return iterator{this};
     }
-    auto end() { return iterator{this, true}; }
+    auto end() { return sentinel{}; }
 
    private:
+    struct sentinel {};
     struct iterator {
       using value_type        = ElementType;
       using difference_type   = std::ptrdiff_t;
@@ -76,15 +77,14 @@ namespace toby {
       using pointer           = ElementType*;
       using iterator_category = std::input_iterator_tag;
 
-      iterator() : m_generator(nullptr), m_done(true) {}
-      iterator(generator* gen, bool done) : m_generator(gen), m_done(done) {}
+      iterator() = default;
+      iterator(generator* gen) : m_generator(gen) {}
 
-      bool operator==(const iterator& other) const { return m_done == other.m_done; }
-      bool operator!=(const iterator& other) const { return !(*this == other); }
+      bool operator==(const sentinel& other) const { return m_generator->m_coro->done(); }
+      bool operator!=(const sentinel& other) const { return !(*this == other); }
 
       iterator& operator++() {
         m_generator->m_coro->resume();
-        m_done = m_generator->m_coro->done();
         return *this;
       }
 
@@ -107,8 +107,10 @@ namespace toby {
       }
 
       generator* m_generator;
-      bool m_done;
     };
+
+    friend bool operator==(const sentinel& s, const iterator& it) { return it == s; }
+    friend bool operator!=(const sentinel& s, const iterator& it) { return it != s; }
 
     intrusive_coroutine_handle<promise_type> m_coro;
   };
