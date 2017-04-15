@@ -47,8 +47,9 @@ TEST_CASE("three elements") {
   SUBCASE("incrementing the iterator doesn't change the previous value") {
     CHECK(v == 0);
   }
-  auto&& v2 = *i++;
+  auto&& v2 = *i;
   SUBCASE("second element is one") { CHECK(v2 == 1); }
+  i++;
   i++;
   SUBCASE("post-increment to end") { CHECK(i == g.end()); }
 }
@@ -57,8 +58,9 @@ TEST_CASE("move-only type") {
   auto g = move_only();
   auto i = g.begin();
   CHECK(**i == 7);
-  auto v = std::move(*i++);
+  auto v = std::move(*i);
   CHECK(*v == 7);
+  i++;
   REQUIRE(*i);
   CHECK(**i == 42);
   auto v2 = std::move(*i);
@@ -97,15 +99,22 @@ TEST_CASE("infinite generator") {
     auto i = g.begin();
     CHECK(*i == 0);
     ++i;
-    CHECK(*i++ == 1);
+    CHECK(*i == 1);
+    i++;
   }
   SUBCASE("take 5") {
     CONCEPT_ASSERT(ranges::v3::Destructible<decltype(g.begin())>::value);
     CONCEPT_ASSERT(ranges::v3::Iterator<decltype(g.begin())>::value);
     CONCEPT_ASSERT(ranges::v3::Readable<decltype(g.begin())>::value);
-    CONCEPT_ASSERT(ranges::v3::DefaultConstructible<decltype(g.begin()++)>::value);
-    CONCEPT_ASSERT(ranges::v3::Readable<decltype(g.begin()++)>::value);
     CONCEPT_ASSERT(ranges::v3::InputIterator<decltype(g.begin())>::value);
+    CONCEPT_ASSERT(ranges::v3::Regular<decltype(g.end())>::value);
+#if !defined(RANGE_V3_VERSION) || RANGE_V3_VERSION < 200
+    CONCEPT_ASSERT(
+        ranges::v3::CommonReference<decltype(g.begin()), decltype(g.end())>::value);
+    CONCEPT_ASSERT(
+        ranges::v3::EqualityComparable<decltype(g.begin()), decltype(g.end())>::value);
+#endif
+    CONCEPT_ASSERT(ranges::v3::Range<decltype(g)>::value);
     CONCEPT_ASSERT(ranges::v3::InputRange<decltype(g)>::value);
     auto a             = ranges::view::take(5) | ranges::to_vector;
     auto b             = g | ranges::view::take(5);

@@ -5,13 +5,14 @@ target_include_directories(generator
   PRIVATE src)
 target_compile_features(generator
   PUBLIC cxx_generic_lambdas)
+target_link_libraries(generator PUBLIC range-v3)
 if(MSVC)
   target_compile_options(generator
     PUBLIC /await)
 else() # clang
   target_compile_options(generator
     PUBLIC -fcoroutines-ts -stdlib=libc++)
-  target_link_libraries(generator -stdlib=libc++)
+  target_link_libraries(generator PUBLIC -stdlib=libc++)
 endif()
 
 add_executable(generator_test test/generator.cpp test/main.cpp)
