@@ -29,6 +29,18 @@ void bench_co_ints_gor(int n) {
   }
 }
 
+#ifdef HAS_EXPERIMENTAL_GENERATOR
+
+#include <experimental/generator>
+
+void bench_co_ints_exp(int n) {
+  for (int i : co_ints<std::experimental::generator<int>>(0, n)) {
+    consume(i);
+  }
+}
+
+#endif
+
 void bench_co_ints_atomic(int n) {
   RANGES_FOR(int i, co_ints<toby::generator<int, std::atomic<int>>>(0, n)) { consume(i); }
 }

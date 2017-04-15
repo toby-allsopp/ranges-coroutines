@@ -8,6 +8,10 @@ BENCHMARK(cofoo, co_ints_toby, 1000, 100000 / NUM) { bench_co_ints_toby(NUM); }
 
 BENCHMARK(cofoo, co_ints_gor, 1000, 100000 / NUM) { bench_co_ints_gor(NUM); }
 
+#ifdef HAS_EXPERIMENTAL_GENERATOR
+BENCHMARK(cofoo, co_ints_exp, 1000, 100000 / NUM) { bench_co_ints_exp(NUM); }
+#endif
+
 BENCHMARK(cofoo, co_ints_atomic, 1000, 100000 / NUM) { bench_co_ints_atomic(NUM); }
 
 BENCHMARK(cofoo, handrolled_ints, 1000, 100000 / NUM) { bench_handrolled_ints(NUM); }
