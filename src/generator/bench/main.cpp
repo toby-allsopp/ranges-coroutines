@@ -22,7 +22,7 @@ BENCHMARK(co_ints, cb_ints, 1000, 100000/NUM) {
 }
 */
 
-BENCHMARK(cofoo, ranges, 1000, 1000000 / NUM) { bench_ranges_ints(NUM); }
+BENCHMARK(cofoo, ranges, 1000, 100000 / NUM) { bench_ranges_ints(NUM); }
 
 int main() {
   hayai::ConsoleOutputter consoleOutputter;
