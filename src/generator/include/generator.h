@@ -60,9 +60,11 @@ namespace toby {
   };
 
   struct generator_sentinel {
+#if !defined(RANGE_V3_VERSION) || RANGE_V3_VERSION < 200
     // Range-V3-VS2015 still requires these:
     bool operator==(const generator_sentinel&) const { return true; }
     bool operator!=(const generator_sentinel&) const { return false; }
+#endif
   };
 
   template <class PromiseType>
@@ -133,9 +135,11 @@ namespace toby {
     bool operator==(const generator_sentinel&) const { return m_coro.done(); }
     bool operator!=(const generator_sentinel& other) const { return !(*this == other); }
 
+#if !defined(RANGE_V3_VERSION) || RANGE_V3_VERSION < 200
     // Range-V3-VS2015 still requires these:
     bool operator==(const generator_iterator&) const { return true; }
     bool operator!=(const generator_iterator&) const { return false; }
+#endif
 
     generator_iterator& operator++() {
       m_coro.resume();
