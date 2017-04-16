@@ -59,31 +59,31 @@ namespace toby {
     handle m_coro;
   };
 
-  template <class ElementType, class RefCountType = int>
-  struct generator_sentinel;
-  template <class ElementType, class RefCountType = int>
+  struct generator_sentinel {
+    // Range-V3-VS2015 still requires these:
+    bool operator==(const generator_sentinel&) const { return true; }
+    bool operator!=(const generator_sentinel&) const { return false; }
+  };
+
+  template <class PromiseType>
   struct generator_iterator;
 
   template <class ElementType, class RefCountType = int>
   class generator {
    public:
     struct promise_type;
-    using sentinel = generator_sentinel<ElementType, RefCountType>;
-    using iterator = generator_iterator<ElementType, RefCountType>;
 
     generator() = default;
     generator(std::experimental::coroutine_handle<promise_type> coro) : m_coro(coro) {}
 
     auto begin() {
       m_coro->resume();
-      return iterator{this};
+      return generator_iterator<promise_type>{*m_coro};
     }
-    auto end() { return sentinel{}; }
+    auto end() { return generator_sentinel{}; }
 
    private:
     intrusive_coroutine_handle<promise_type> m_coro;
-
-    friend struct generator_iterator<ElementType, RefCountType>;
   };
 
   template <class ElementType, class RefCountType>
@@ -117,56 +117,46 @@ namespace toby {
     return promise.del_ref();
   }
 
-  template <class ElementType, class RefCountType>
-  struct generator_sentinel {
-    // Range-V3-VS2015 still requires these:
-    bool operator==(const generator_sentinel&) const { return true; }
-    bool operator!=(const generator_sentinel&) const { return false; }
-  };
-
-  template <class ElementType, class RefCountType>
+  template <class PromiseType>
   struct generator_iterator {
+    using ElementType       = decltype(std::declval<PromiseType>().currentElement);
     using value_type        = ElementType;
     using difference_type   = std::ptrdiff_t;
     using reference         = ElementType&;
     using pointer           = ElementType*;
     using iterator_category = std::input_iterator_tag;
 
-    using generator      = generator<ElementType, RefCountType>;
     generator_iterator() = default;
-    generator_iterator(generator* gen) : m_generator(gen) {}
+    generator_iterator(std::experimental::coroutine_handle<PromiseType> coro)
+        : m_coro(coro) {}
 
-    bool operator==(const generator_sentinel<ElementType, RefCountType>& other) const {
-      return m_generator->m_coro->done();
-    }
-    bool operator!=(const generator_sentinel<ElementType, RefCountType>& other) const {
-      return !(*this == other);
-    }
+    bool operator==(const generator_sentinel&) const { return m_coro.done(); }
+    bool operator!=(const generator_sentinel& other) const { return !(*this == other); }
 
     // Range-V3-VS2015 still requires these:
     bool operator==(const generator_iterator&) const { return true; }
     bool operator!=(const generator_iterator&) const { return false; }
 
     generator_iterator& operator++() {
-      m_generator->m_coro->resume();
+      m_coro.resume();
       return *this;
     }
 
     void operator++(int) { ++(*this); }
 
-    reference operator*() const { return m_generator->m_coro->promise().currentElement; }
+    reference operator*() const { return m_coro.promise().currentElement; }
 
-    generator* m_generator;
+    std::experimental::coroutine_handle<PromiseType> m_coro;
   };
 
-  template <class ElementType, class RefCountType>
-  bool operator==(const generator_sentinel<ElementType, RefCountType>& s,
-                  const generator_iterator<ElementType, RefCountType>& it) {
+  template <class PromiseType>
+  bool operator==(const generator_sentinel& s,
+                  const generator_iterator<PromiseType>& it) {
     return it == s;
   }
-  template <class ElementType, class RefCountType>
-  bool operator!=(const generator_sentinel<ElementType, RefCountType>& s,
-                  const generator_iterator<ElementType, RefCountType>& it) {
+  template <class PromiseType>
+  bool operator!=(const generator_sentinel& s,
+                  const generator_iterator<PromiseType>& it) {
     return it != s;
   }
 
@@ -177,17 +167,15 @@ namespace toby {
 #if !defined(RANGE_V3_VERSION) || RANGE_V3_VERSION < 200
 namespace ranges {
   namespace v3 {
-    template <class ElementType, class RefCountType>
-    struct common_type<toby::generator_iterator<ElementType, RefCountType>,
-                       toby::generator_sentinel<ElementType, RefCountType>> {
-      using type = common_iterator<toby::generator_iterator<ElementType, RefCountType>,
-                                   toby::generator_sentinel<ElementType, RefCountType>>;
+    template <class PromiseType>
+    struct common_type<toby::generator_iterator<PromiseType>, toby::generator_sentinel> {
+      using type = common_iterator<toby::generator_iterator<PromiseType>,
+                                   toby::generator_sentinel>;
     };
-    template <class ElementType, class RefCountType>
-    struct common_type<toby::generator_sentinel<ElementType, RefCountType>,
-                       toby::generator_iterator<ElementType, RefCountType>> {
-      using type = common_iterator<toby::generator_iterator<ElementType, RefCountType>,
-                                   toby::generator_sentinel<ElementType, RefCountType>>;
+    template <class PromiseType>
+    struct common_type<toby::generator_sentinel, toby::generator_iterator<PromiseType>> {
+      using type = common_iterator<toby::generator_iterator<PromiseType>,
+                                   toby::generator_sentinel>;
     };
   }
 }
