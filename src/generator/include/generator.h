@@ -148,7 +148,11 @@ namespace toby {
 
     void operator++(int) { ++(*this); }
 
-    reference operator*() const { return m_coro.promise().currentElement; }
+    reference operator*() const {
+      // This const_cast shouldn't be necessary according to N4663 but VS2017.1 has
+      // promise() const returning a const reference.
+      return const_cast<PromiseType&>(m_coro.promise()).currentElement;
+    }
 
     std::experimental::coroutine_handle<PromiseType> m_coro;
   };
