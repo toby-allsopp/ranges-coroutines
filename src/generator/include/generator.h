@@ -13,18 +13,20 @@ namespace toby {
   /// An RAII-style shared-ownership wrapper for
   /// std::experimental::coroutine_handle.
   ///
-  /// Cooperation with the promise object is required, ala boost::intrusive_ptr.
-  /// The
-  /// promise object is required to have two member functions: `void add_ref()`
-  /// and `int
-  /// del_ref()`.
+  /// Cooperation with the promise object is required in order to maintain the reference
+  /// count, ala boost::intrusive_ptr.
+  ///
+  /// The reference count in increased by calling `intrusive_coroutine_handle_add_ref` and
+  /// decreased by calling `intrusive_coroutine_handle_release`. These functions are found
+  /// via ADL based on the promise type.
   template <class PromiseType>
   class intrusive_coroutine_handle {
    public:
+    using handle = std::experimental::coroutine_handle<PromiseType>;
+
     intrusive_coroutine_handle() : m_coro(nullptr) {}
-    intrusive_coroutine_handle(std::experimental::coroutine_handle<PromiseType> coro)
-        : m_coro(coro) {
-      intrusive_coroutine_handle_add_ref(m_coro);
+    intrusive_coroutine_handle(handle coro) : m_coro(coro) {
+      if (m_coro) intrusive_coroutine_handle_add_ref(m_coro.promise());
     }
 
     intrusive_coroutine_handle(const intrusive_coroutine_handle& other)
@@ -45,13 +47,16 @@ namespace toby {
       return *this;
     }
 
-    ~intrusive_coroutine_handle() { intrusive_coroutine_handle_release(m_coro); }
+    ~intrusive_coroutine_handle() {
+      if (m_coro && intrusive_coroutine_handle_release(m_coro.promise()) == 0)
+        m_coro.destroy();
+    }
 
-    std::experimental::coroutine_handle<PromiseType>& operator*() { return m_coro; }
-    std::experimental::coroutine_handle<PromiseType>* operator->() { return &m_coro; }
+    handle& operator*() { return m_coro; }
+    handle* operator->() { return &m_coro; }
 
    private:
-    std::experimental::coroutine_handle<PromiseType> m_coro;
+    handle m_coro;
   };
 
   template <class ElementType, class RefCountType = int>
@@ -103,15 +108,13 @@ namespace toby {
   };
 
   template <typename PromiseType>
-  void intrusive_coroutine_handle_add_ref(
-      std::experimental::coroutine_handle<PromiseType> coro) {
-    if (coro) coro.promise().add_ref();
+  void intrusive_coroutine_handle_add_ref(PromiseType& promise) {
+    promise.add_ref();
   }
 
   template <typename PromiseType>
-  void intrusive_coroutine_handle_release(
-      std::experimental::coroutine_handle<PromiseType> coro) {
-    if (coro && coro.promise().del_ref() == 0) coro.destroy();
+  int intrusive_coroutine_handle_release(PromiseType& promise) {
+    return promise.del_ref();
   }
 
   template <class ElementType, class RefCountType>
