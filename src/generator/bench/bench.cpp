@@ -59,12 +59,33 @@ void bench_ints_ranges(int n) {
 }
 
 template <typename Generator, typename InputRange, typename UnaryPredicate>
-auto co_remove_if(InputRange range, UnaryPredicate pred) -> Generator {
+auto co_remove_if_impl(InputRange range, UnaryPredicate pred) -> Generator {
   RANGES_FOR(auto&& x, range) {
     if (pred(x)) {
       co_yield x;
     }
   }
+}
+
+template <typename Generator, typename InputRange, typename UnaryPredicate>
+auto co_remove_if(InputRange&& range, UnaryPredicate&& pred) -> Generator {
+  return co_remove_if_impl<Generator, InputRange>(std::forward<InputRange>(range),
+                                                  std::forward<UnaryPredicate>(pred));
+}
+
+template <typename Generator, typename InputRange, typename UnaryPredicate>
+auto co_remove_if_nonrange_impl(InputRange range, UnaryPredicate pred) -> Generator {
+  for (auto&& x : range) {
+    if (pred(x)) {
+      co_yield x;
+    }
+  }
+}
+
+template <typename Generator, typename InputRange, typename UnaryPredicate>
+auto co_remove_if_nonrange(InputRange&& range, UnaryPredicate&& pred) -> Generator {
+  return co_remove_if_nonrange_impl<Generator, InputRange>(
+      std::forward<InputRange>(range), std::forward<UnaryPredicate>(pred));
 }
 
 template <typename Generator, typename UnaryPredicate>
@@ -84,10 +105,21 @@ void bench_filter_generator_toby(int n) {
   }
 }
 
+void bench_filter_generator_toby_ref(int n) {
+  auto g = co_ints<toby::generator<int>>(0, n);
+  RANGES_FOR(int i, g | co_remove_if<toby::generator<int>>(pred)) { consume(i); }
+}
+
 void bench_filter_generator_gor(int n) {
-  RANGES_FOR(
-      int i,
-      co_ints<gor::generator<int>>(0, n) | co_remove_if<gor::generator<int>>(pred)) {
+  for (int i : co_remove_if_nonrange<gor::generator<int>>(
+           co_ints<gor::generator<int>>(0, n), pred)) {
+    consume(i);
+  }
+}
+
+void bench_filter_generator_gor_ref(int n) {
+  auto g = co_ints<gor::generator<int>>(0, n);
+  for (int i : co_remove_if_nonrange<gor::generator<int>>(g, pred)) {
     consume(i);
   }
 }
