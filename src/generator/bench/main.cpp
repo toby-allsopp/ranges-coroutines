@@ -4,25 +4,25 @@
 
 static const int NUM = 100;
 
-BENCHMARK(cofoo, co_ints_toby, 1000, 100000 / NUM) { bench_co_ints_toby(NUM); }
+BENCHMARK(ints, generator_toby, 1000, 100000 / NUM) { bench_ints_generator_toby(NUM); }
 
-BENCHMARK(cofoo, co_ints_gor, 1000, 100000 / NUM) { bench_co_ints_gor(NUM); }
+BENCHMARK(ints, generator_gor, 1000, 100000 / NUM) { bench_ints_generator_gor(NUM); }
 
 #ifdef HAS_EXPERIMENTAL_GENERATOR
-BENCHMARK(cofoo, co_ints_exp, 1000, 100000 / NUM) { bench_co_ints_exp(NUM); }
+BENCHMARK(ints, generator_exp, 1000, 100000 / NUM) { bench_ints_generator_exp(NUM); }
 #endif
 
-BENCHMARK(cofoo, co_ints_atomic, 1000, 100000 / NUM) { bench_co_ints_atomic(NUM); }
+BENCHMARK(ints, generator_toby_atomic, 1000, 100000 / NUM) { bench_ints_generator_toby_atomic(NUM); }
 
-BENCHMARK(cofoo, handrolled_ints, 1000, 100000 / NUM) { bench_handrolled_ints(NUM); }
+BENCHMARK(ints, handrolled, 1000, 100000 / NUM) { bench_ints_handrolled(NUM); }
 
 /*
-BENCHMARK(co_ints, cb_ints, 1000, 100000/NUM) {
+BENCHMARK(ints, callback, 1000, 100000/NUM) {
   cb_ints(0, NUM, [](int i) { consume(i); });
 }
 */
 
-BENCHMARK(cofoo, ranges, 1000, 100000 / NUM) { bench_ranges_ints(NUM); }
+BENCHMARK(ints, ranges, 1000, 100000 / NUM) { bench_ints_ranges(NUM); }
 
 int main() {
   hayai::ConsoleOutputter consoleOutputter;

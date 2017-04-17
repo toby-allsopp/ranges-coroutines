@@ -19,11 +19,11 @@ void cb_ints(int start, int end, F&& f) {
 
 extern void consume(int);
 
-void bench_co_ints_toby(int n) {
+void bench_ints_generator_toby(int n) {
   RANGES_FOR(int i, co_ints<toby::generator<int>>(0, n)) { consume(i); }
 }
 
-void bench_co_ints_gor(int n) {
+void bench_ints_generator_gor(int n) {
   for (int i : co_ints<gor::generator<int>>(0, n)) {
     consume(i);
   }
@@ -33,7 +33,7 @@ void bench_co_ints_gor(int n) {
 
 #include <experimental/generator>
 
-void bench_co_ints_exp(int n) {
+void bench_ints_generator_exp(int n) {
   for (int i : co_ints<std::experimental::generator<int>>(0, n)) {
     consume(i);
   }
@@ -41,17 +41,17 @@ void bench_co_ints_exp(int n) {
 
 #endif
 
-void bench_co_ints_atomic(int n) {
+void bench_ints_generator_toby_atomic(int n) {
   RANGES_FOR(int i, co_ints<toby::generator<int, std::atomic<int>>>(0, n)) { consume(i); }
 }
 
-void bench_handrolled_ints(int n) {
+void bench_ints_handrolled(int n) {
   for (int i = 0; i < n; ++i) {
     consume(i);
   }
 }
 
-void bench_ranges_ints(int n) {
+void bench_ints_ranges(int n) {
   for (auto i : ranges::view::ints(0, n)) {
     consume(i);
   }
