@@ -1,5 +1,11 @@
 # Helpers for Ranges + Coroutines #
 
+## UPDATE
+
+The code in this repository is now obsolete. The range-v3 library now contains a generator that works as a View. Please use that instead as it is more feature-complete and correct that the implementation in this repository.
+
+## Introduction
+
 This repository contains some helpers for and demonstrations of using Ranges and Coroutines together.
 
 Currently this code has only been tested using Visual Studio 2017 and a build of specific branches of clang and libc++.
